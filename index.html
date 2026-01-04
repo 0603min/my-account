@@ -22,19 +22,25 @@
         </div>
 
         <div class="glass-ui p-6 mb-8 space-y-4">
-            <input id="desc" type="text" placeholder="✏️ 項目內容 (如: 午餐)" class="input-style">
+            <input id="desc" type="text" placeholder="✏️ 項目內容 (如: 薪水/午餐)" class="input-style">
             <input id="amt" type="number" placeholder="💵 金額" class="input-style">
             
             <div>
                 <label class="text-xs text-secondary-custom ml-2 mb-1 block">🏷️ 選擇分類</label>
                 <select id="category" class="input-style">
-                    <option value="飲食">🍔 飲食 (午晚餐/零食)</option>
-                    <option value="飲料">🥤 飲料手搖</option>
-                    <option value="交通">🛵 交通油資 (加油/保養)</option>
-                    <option value="固定">🗓️ 固定支出 (電話/訂閱/學貸)</option>
-                    <option value="投資">📈 定額投資</option>
-                    <option value="社交">🎁 社交送禮 (朋友生日/出去玩)</option>
-                    <option value="其他">🛠️ 其他雜項</option>
+                    <optgroup label="💸 支出">
+                        <option value="飲食">🍔 飲食 (午晚餐/零食)</option>
+                        <option value="飲料">🥤 飲料手搖</option>
+                        <option value="交通">🛵 交通油資 (加油/保養)</option>
+                        <option value="固定">🗓️ 定期支出 (電話/訂閱/學貸)</option>
+                        <option value="投資">📈 定額投資</option>
+                        <option value="社交">🎁 社交送禮 (朋友生日/玩)</option>
+                        <option value="其他支出">🛠️ 其他雜項</option>
+                    </optgroup>
+                    <optgroup label="✨ 存入">
+                        <option value="薪資">💰 薪資收入</option>
+                        <option value="其他存入">🧧 其他存入</option>
+                    </optgroup>
                 </select>
             </div>
 

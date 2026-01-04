@@ -45,24 +45,51 @@ async function sendData(type) {
             method: 'POST', 
             body: JSON.stringify({ desc, amount: Number(amount), type, customDate: time, category }) 
         });
-        location.reload();
+        // 成功後清除輸入框，並重新抓取資料
+        document.getElementById('desc').value = '';
+        document.getElementById('amt').value = '';
+        await fetchData(); 
+        setDefaultTime();
     } catch (e) { alert("傳送失敗"); showLoading(false); }
 }
 
 // --- 5. 渲染畫面 ---
 function render(data) {
-    let b = 0;
     const list = document.getElementById('list');
-    const categoryIcons = { "飲食":"🍔", "飲料":"🥤", "交通":"🛵", "固定":"🗓️", "投資":"📈", "社交":"🎁", "其他":"🛠️" };
+    const balanceEl = document.getElementById('balance');
+    
+    // 定義所有可能的分類圖示
+    const categoryIcons = { 
+        "飲食":"🍔", "飲料":"🥤", "交通":"🛵", "固定":"🗓️", 
+        "投資":"📈", "社交":"🎁", "其他支出":"🛠️",
+        "薪資":"💰", "其他存入":"🧧", "其他":"💰"
+    };
 
-    list.innerHTML = data.reverse().map((i, index) => {
+    // 計算總餘額 (不論原始排序)
+    let totalBalance = 0;
+    data.forEach(i => {
+        const amt = Number(i.amount);
+        totalBalance += (i.type === 'income' ? amt : -amt);
+    });
+    balanceEl.innerText = `$ ${totalBalance.toLocaleString()}`;
+    
+    // 觸發餘額跳動動畫
+    balanceEl.classList.add('balance-animate');
+    setTimeout(() => balanceEl.classList.remove('balance-animate'), 500);
+
+    // 關鍵修正：依據時間精確排序 (最新的在最上面)
+    const sortedData = [...data].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    list.innerHTML = sortedData.map((i, index) => {
         const isInc = i.type === 'income';
-        b += isInc ? Number(i.amount) : -Number(i.amount);
-        const icon = categoryIcons[i.category] || "💰";
-        const dateStr = new Date(i.date).toLocaleDateString();
+        const icon = categoryIcons[i.category] || "💵";
+        
+        // 格式化日期顯示：MM/DD HH:mm
+        const d = new Date(i.date);
+        const dateStr = `${d.getMonth() + 1}/${d.getDate()} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
         
         return `
-            <div class="glass-ui p-4 flex justify-between items-center" style="animation: slideUp 0.5s ease forwards; animation-delay: ${index * 0.05}s; opacity: 0;">
+            <div class="glass-ui p-4 flex justify-between items-center list-item" style="animation-delay: ${index * 0.03}s">
                 <div>
                     <b class="text-primary-custom text-lg">${icon} ${i.desc}</b>
                     <p class="text-xs text-secondary-custom">${dateStr} · ${i.category}</p>
@@ -72,7 +99,6 @@ function render(data) {
                 </span>
             </div>`;
     }).join('');
-    document.getElementById('balance').innerText = `$ ${b.toLocaleString()}`;
 }
 
 // --- 6. 載入進度條 ---
@@ -87,6 +113,7 @@ const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
 let particles = [];
 function initCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+
 class Particle {
     constructor() { this.reset(); }
     reset() {
