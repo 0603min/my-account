@@ -3,12 +3,14 @@ const API = 'https://script.google.com/macros/s/AKfycbzLAWeTRW4efS5NHRXrYD9Hd5qZ
 
 // --- 1. 主題切換邏輯 ---
 function toggleTheme() {
-    const body = document.documentElement; // 改為 documentElement 確保全域套用
-    const isDark = body.getAttribute('data-theme') === 'dark';
+    const root = document.documentElement; // 關鍵：對準 html 標籤
+    const isDark = root.getAttribute('data-theme') === 'dark';
     const newTheme = isDark ? 'light' : 'dark';
     
-    body.setAttribute('data-theme', newTheme);
+    root.setAttribute('data-theme', newTheme);
     localStorage.setItem('theme', newTheme);
+    
+    // 更新圖示
     document.getElementById('themeToggle').innerText = newTheme === 'dark' ? '☀️' : '🌙';
 }
 
