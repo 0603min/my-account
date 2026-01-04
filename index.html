@@ -3,63 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026 雲端記帳</title>
+    <title>2026 雲端記帳本</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background: #f8fafc; font-family: sans-serif; }
-        .glass { background: white; border-radius: 20px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body class="p-5">
+    <div class="loading-bar" id="loadingBar"></div>
+    
+    <!-- 深色模式切換按鈕 -->
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">
+        🌙
+    </button>
+
     <div class="max-w-md mx-auto">
-        <h1 class="text-2xl font-bold mb-5 text-center">💰 我的雲端帳本</h1>
-        
-        <div class="glass p-6 mb-5 text-center">
-            <p class="text-gray-500 text-sm">總餘額</p>
-            <h2 id="bal" class="text-3xl font-bold">$ 0</h2>
+        <h1 class="text-3xl font-bold mb-8 text-center gradient-text">💰 2026 精緻記帳</h1>
+
+        <!-- 餘額卡片 -->
+        <div class="glass-ui p-8 mb-6 text-center">
+            <p class="text-secondary-custom text-sm mb-2">目前餘額</p>
+            <h2 id="balance" class="text-5xl font-bold text-primary-custom balance-animate">$ 0</h2>
         </div>
 
-        <div class="glass p-6 mb-5 space-y-3">
-            <input id="desc" type="text" placeholder="項目" class="w-full p-3 border rounded-xl outline-none focus:ring-2 ring-blue-500">
-            <input id="amt" type="number" placeholder="金額" class="w-full p-3 border rounded-xl outline-none focus:ring-2 ring-blue-500">
-            <div class="flex gap-2">
-                <button onclick="add('income')" class="flex-1 bg-green-500 text-white py-3 rounded-xl font-bold">存入</button>
-                <button onclick="add('expense')" class="flex-1 bg-red-500 text-white py-3 rounded-xl font-bold">支出</button>
+        <!-- 輸入表單 -->
+        <div class="glass-ui p-6 mb-8 space-y-4">
+            <input id="desc" type="text" placeholder="✏️ 項目內容" class="input-style">
+            
+            <input id="amt" type="number" placeholder="💵 金額" class="input-style">
+            
+            <div>
+                <label class="text-xs text-secondary-custom ml-2 mb-1 block">⏰ 發生時間</label>
+                <input id="time" type="datetime-local" class="input-style">
+            </div>
+
+            <div class="flex gap-3 pt-2">
+                <button onclick="sendData('income')" class="flex-1 bg-emerald-500 text-white py-4 rounded-2xl font-bold text-lg btn-primary">
+                    ✨ 存入
+                </button>
+                <button onclick="sendData('expense')" class="flex-1 bg-gradient-to-r from-slate-700 to-slate-900 text-white py-4 rounded-2xl font-bold text-lg btn-primary">
+                    💸 支出
+                </button>
             </div>
         </div>
 
-        <div id="list" class="space-y-2"></div>
+        <!-- 記錄列表 -->
+        <div id="list" class="space-y-3"></div>
     </div>
 
     <script>
-        const API = 'https://script.google.com/macros/s/AKfycbzLAWeTRW4efS5NHRXrYD9Hd5qZGsBeV7U6IMRf-EOxLPP9IO4cVPjpSzyGntwRjwd1eg/exec'; // <--- 這裡換成你的網址
+        const API = 'https://script.google.com/macros/s/AKfycbzLAWeTRW4efS5NHRXrYD9Hd5qZGsBeV7U6IMRf-EOxLPP9IO4cVPjpSzyGntwRjwd1eg/exec'; // <--- 請換上你的網址
 
-        window.onload = load;
-
-        async function load() {
-            const res = await fetch(API);
-            const data = await res.json();
-            let b = 0;
-            document.getElementById('list').innerHTML = data.reverse().map(i => {
-                const isInc = i.type === 'income';
-                b += isInc ? i.amount : -i.amount;
-                return `<div class="glass p-4 flex justify-between">
-                    <div><b>${i.desc}</b><br><small class="text-gray-400">${new Date(i.date).toLocaleDateString()}</small></div>
-                    <span class="${isInc?'text-green-500':'text-red-500'} font-bold">${isInc?'+':'-'}$${i.amount}</span>
-                </div>`;
-            }).join('');
-            document.getElementById('bal').innerText = `$ ${b}`;
+        // 初始化主題
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
         }
 
-        async function add(type) {
+        // 切換主題
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        // 更新主題圖示
+        function updateThemeIcon(theme) {
+            document.getElementById('themeToggle').innerText = theme === 'dark' ? '☀️' : '🌙';
+        }
+
+        // 頁面開啟時做三件事：初始化主題、設定預設時間、抓資料
+        window.onload = () => {
+            initTheme();
+            setDefaultTime();
+            fetchData();
+        };
+
+        // 設定「當下時間」到輸入框
+        function setDefaultTime() {
+            const now = new Date();
+            const offset = now.getTimezoneOffset() * 60000;
+            const localISOTime = (new Date(now - offset)).toISOString().slice(0, 16);
+            document.getElementById('time').value = localISOTime;
+        }
+
+        async function fetchData() {
+            showLoading(true);
+            try {
+                const res = await fetch(API);
+                const data = await res.json();
+                let b = 0;
+                document.getElementById('list').innerHTML = data.reverse().map((i, index) => {
+                    const isInc = i.type === 'income';
+                    b += isInc ? Number(i.amount) : -Number(i.amount);
+                    const dateObj = new Date(i.date);
+                    const timeStr = dateObj.toLocaleDateString() + ' ' + dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    
+                    return `
+                        <div class="glass-ui p-5 flex justify-between items-center list-item" style="animation-delay: ${index * 0.05}s">
+                            <div>
+                                <p class="font-bold text-primary-custom text-lg">${i.desc}</p>
+                                <p class="text-xs text-secondary-custom mt-1">📅 ${timeStr}</p>
+                            </div>
+                            <span class="${isInc?'text-emerald-500':'text-rose-500'} font-bold text-xl">
+                                ${isInc?'+':'-'}$${Number(i.amount).toLocaleString()}
+                            </span>
+                        </div>`;
+                }).join('');
+                
+                const balanceEl = document.getElementById('balance');
+                balanceEl.innerText = `$ ${b.toLocaleString()}`;
+                balanceEl.classList.add('balance-animate');
+                setTimeout(() => balanceEl.classList.remove('balance-animate'), 500);
+            } catch (error) {
+                console.error('載入失敗:', error);
+            }
+            showLoading(false);
+        }
+
+        async function sendData(type) {
             const desc = document.getElementById('desc').value;
             const amount = document.getElementById('amt').value;
-            if(!desc || !amount) return alert('請填寫');
+            const time = document.getElementById('time').value;
+
+            if(!desc || !amount || !time) {
+                alert('請完整填寫資訊 📝');
+                return;
+            }
+
+            showLoading(true);
             
-            // 立即顯示載入感
-            document.body.style.opacity = '0.5';
-            await fetch(API, { method: 'POST', body: JSON.stringify({ desc, amount: Number(amount), type }) });
-            location.reload();
+            try {
+                await fetch(API, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ 
+                        desc: desc, 
+                        amount: Number(amount), 
+                        type: type,
+                        customDate: time
+                    }) 
+                });
+                
+                location.reload();
+            } catch (error) {
+                console.error('送出失敗:', error);
+                showLoading(false);
+            }
+        }
+
+        // 載入進度條
+        function showLoading(show) {
+            const bar = document.getElementById('loadingBar');
+            if (show) {
+                bar.style.width = '70%';
+                document.body.style.opacity = '0.7';
+            } else {
+                bar.style.width = '100%';
+                setTimeout(() => {
+                    bar.style.width = '0';
+                    document.body.style.opacity = '1';
+                }, 300);
+            }
         }
     </script>
 </body>
