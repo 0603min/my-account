@@ -11,7 +11,8 @@
 }
 
 /* 這裡將屬性選擇器微調，確保 HTML 或 body 都能抓到 */
-[data-theme="dark"] {
+/* 修改後： */
+:root[data-theme="dark"] {
     --bg-primary: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
     --bg-secondary: #0f172a;
     --card-bg: rgba(30, 41, 59, 0.9);
@@ -43,7 +44,8 @@ body::before {
 /* ===== 3. 漸層文字與玻璃卡片 ===== */
 .gradient-text {
     background: var(--bg-primary) !important;
-    -webkit-background-clip: text !important;
+    -webkit-background-clip: text !important; /* 原有的 */
+    background-clip: text !important;         /* 補上這一行 */
     -webkit-text-fill-color: transparent !important;
     display: inline-block;
 }
