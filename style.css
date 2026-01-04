@@ -23,8 +23,8 @@
 
 /* ===== 基礎樣式 ===== */
 body { 
-    background: var(--bg-secondary);
-    font-family: 'Segoe UI', sans-serif;
+    background: var(--bg-secondary) !important;
+    font-family: 'Segoe UI', sans-serif !important;
     transition: background 0.3s ease;
     position: relative;
     overflow-x: hidden;
@@ -51,40 +51,40 @@ body::before {
 
 /* ===== 玻璃質感卡片 ===== */
 .glass-ui { 
-    background: var(--card-bg);
+    background: var(--card-bg) !important;
     backdrop-filter: blur(10px);
     border-radius: 24px;
-    box-shadow: 0 8px 32px var(--shadow);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px var(--shadow) !important;
+    border: 1px solid rgba(255, 255, 255, 0.18) !important;
     transition: all 0.3s ease;
 }
 
 .glass-ui:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 40px var(--shadow);
+    box-shadow: 0 12px 40px var(--shadow) !important;
 }
 
 /* ===== 輸入框樣式 ===== */
 .input-style { 
     width: 100%;
-    padding: 14px 16px;
-    background: var(--input-bg);
-    border: 2px solid var(--input-border);
-    border-radius: 16px;
+    padding: 14px 16px !important;
+    background: var(--input-bg) !important;
+    border: 2px solid var(--input-border) !important;
+    border-radius: 16px !important;
     outline: none;
     transition: all 0.3s ease;
-    color: var(--text-primary);
+    color: var(--text-primary) !important;
     font-size: 15px;
 }
 
 .input-style:focus { 
-    border-color: #667eea;
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    border-color: #667eea !important;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1) !important;
     transform: scale(1.02);
 }
 
 .input-style::placeholder {
-    color: var(--text-secondary);
+    color: var(--text-secondary) !important;
 }
 
 /* ===== 按鈕動畫效果 ===== */
@@ -114,7 +114,7 @@ body::before {
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2) !important;
 }
 
 .btn-primary:active {
@@ -155,8 +155,8 @@ body::before {
     width: 50px;
     height: 50px;
     border-radius: 50%;
-    background: var(--card-bg);
-    border: 2px solid var(--input-border);
+    background: var(--card-bg) !important;
+    border: 2px solid var(--input-border) !important;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -164,7 +164,7 @@ body::before {
     font-size: 24px;
     transition: all 0.3s ease;
     z-index: 1000;
-    box-shadow: 0 4px 15px var(--shadow);
+    box-shadow: 0 4px 15px var(--shadow) !important;
 }
 
 .theme-toggle:hover {
@@ -173,17 +173,17 @@ body::before {
 
 /* ===== 標題漸變文字 ===== */
 .gradient-text {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
 }
 
 [data-theme="dark"] .gradient-text {
-    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
 }
 
 /* ===== 進度條載入效果 ===== */
@@ -200,9 +200,9 @@ body::before {
 
 /* ===== 文字顏色工具類 ===== */
 .text-primary-custom {
-    color: var(--text-primary);
+    color: var(--text-primary) !important;
 }
 
 .text-secondary-custom {
-    color: var(--text-secondary);
+    color: var(--text-secondary) !important;
 }
