@@ -3,89 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026 雲端記帳本</title>
+    <title>我的 2026 雲端帳本</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Noto Sans TC', sans-serif; background: #f0f2f5; }
-        .glass-ui { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-        .loading { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.7); z-index: 100; justify-content: center; align-items: center; }
+        body { font-family: 'Noto Sans TC', sans-serif; background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%); min-height: 100vh; }
+        .glass-ui { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); border-radius: 24px; border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 8px 32px rgba(0,0,0,0.05); }
+        .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 999; justify-content: center; align-items: center; flex-direction: column; }
+        .btn-active:active { transform: scale(0.95); }
     </style>
 </head>
-<body class="p-4 md:p-8">
-    <div id="loader" class="loading font-bold text-indigo-600">同步雲端資料中...</div>
+<body class="p-4 md:p-10">
 
-    <div class="max-w-lg mx-auto">
-        <header class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold text-gray-800">2026 雲端帳本</h1>
-            <button onclick="fetchData()" class="text-indigo-600 text-sm font-medium">🔄 刷新</button>
+    <div id="loader" class="loading-overlay">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
+        <p class="text-indigo-600 font-bold">雲端同步中...</p>
+    </div>
+
+    <div class="max-w-md mx-auto">
+        <header class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight">2026 帳本</h1>
+                <p class="text-gray-400 text-sm">數據儲存於 Google 雲端</p>
+            </div>
+            <button onclick="fetchData()" class="p-2 bg-white rounded-full shadow-sm hover:rotate-180 transition-transform duration-500">
+                🔄
+            </button>
         </header>
 
-        <div class="glass-ui p-6 mb-6 grid grid-cols-2 gap-4">
-            <div class="col-span-2 text-center pb-4 border-b border-gray-100">
-                <p class="text-gray-400 text-sm">當前總餘額</p>
-                <h2 id="balance" class="text-4xl font-bold text-gray-800">$ 0</h2>
+        <div class="glass-ui p-6 mb-6">
+            <div class="text-center mb-6">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">目前總資產</p>
+                <h2 id="balance" class="text-4xl font-black text-gray-800 mt-1">$ 0</h2>
             </div>
-            <div class="text-center">
-                <p class="text-green-500 text-xs font-bold">總存入</p>
-                <p id="income" class="text-lg text-gray-700 font-semibold">$ 0</p>
-            </div>
-            <div class="text-center">
-                <p class="text-red-500 text-xs font-bold">總支出</p>
-                <p id="expense" class="text-lg text-gray-700 font-semibold">$ 0</p>
+            <div class="flex justify-around pt-4 border-t border-gray-100">
+                <div class="text-center">
+                    <p class="text-xs text-emerald-500 font-bold">總收入</p>
+                    <p id="income" class="text-lg font-bold text-gray-700">$ 0</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-xs text-rose-500 font-bold">總支出</p>
+                    <p id="expense" class="text-lg font-bold text-gray-700">$ 0</p>
+                </div>
             </div>
         </div>
 
         <div class="glass-ui p-6 mb-8">
-            <input id="desc" type="text" placeholder="項目內容" class="w-full mb-3 p-3 bg-gray-50 border-none rounded-xl outline-none focus:ring-2 ring-indigo-400">
-            <input id="amount" type="number" placeholder="金額" class="w-full mb-4 p-3 bg-gray-50 border-none rounded-xl outline-none focus:ring-2 ring-indigo-400">
-            <div class="flex gap-3">
-                <button onclick="sendData('income')" class="flex-1 bg-indigo-600 text-white py-3 rounded-xl font-bold shadow-lg shadow-indigo-200">存入</button>
-                <button onclick="sendData('expense')" class="flex-1 bg-gray-800 text-white py-3 rounded-xl font-bold">支出</button>
+            <div class="space-y-4">
+                <input id="desc" type="text" placeholder="項目名稱 (如：晚餐)" class="w-full p-4 bg-gray-50 border-none rounded-2xl outline-none focus:ring-2 ring-indigo-400 transition-all">
+                <input id="amount" type="number" inputmode="numeric" placeholder="金額" class="w-full p-4 bg-gray-50 border-none rounded-2xl outline-none focus:ring-2 ring-indigo-400 transition-all">
+                <div class="flex gap-4">
+                    <button onclick="sendData('income')" class="flex-1 bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-indigo-100 btn-active">存入</button>
+                    <button onclick="sendData('expense')" class="flex-1 bg-gray-800 text-white py-4 rounded-2xl font-bold shadow-lg shadow-gray-200 btn-active">支出</button>
+                </div>
             </div>
         </div>
 
-        <h3 class="font-bold text-gray-700 mb-4 px-2">最近交易 (同步至雲端)</h3>
-        <div id="list" class="space-y-3"></div>
+        <h3 class="font-bold text-gray-700 mb-4 px-2 flex items-center">
+            <span class="mr-2">📅</span> 最近交易紀錄
+        </h3>
+        <div id="list" class="space-y-3">
+            </div>
     </div>
 
     <script>
-        const API_URL = 'https://script.google.com/macros/s/AKfycbyrpe7TTYrmK1SL0ar8UDyiuB4nBgA8Y_3-PqzJBVjHz4rFvqEi2rG0b6VERliDfpmbgw/exec'; // 
+        // 這是你專屬的 Google Apps Script 網址
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyrpe7TTYrmK1SL0ar8UDyiuB4nBgA8Y_3-PqzJBVjHz4rFvqEi2rG0b6VERliDfpmbgw/exec';
 
-        // 初始化：從雲端抓資料
+        // 頁面開啟時自動抓取資料
         window.onload = fetchData;
 
         async function fetchData() {
-            showLoader(true);
+            toggleLoader(true);
             try {
                 const response = await fetch(API_URL);
                 const data = await response.json();
                 render(data);
             } catch (e) {
-                alert("抓取資料失敗，請檢查網址或權限設定");
+                console.error(e);
+                alert("抓取資料失敗，請確認 Google 試算表權限已設為「所有人」！");
             }
-            showLoader(false);
+            toggleLoader(false);
         }
 
         async function sendData(type) {
             const desc = document.getElementById('desc').value;
             const amount = parseFloat(document.getElementById('amount').value);
 
-            if (!desc || isNaN(amount)) return alert("請輸入完整資料");
+            if (!desc || isNaN(amount)) return alert("請完整輸入內容與金額唷！");
 
-            showLoader(true);
+            toggleLoader(true);
             try {
+                // 發送資料到 Google Sheets
                 await fetch(API_URL, {
                     method: 'POST',
                     body: JSON.stringify({ desc, amount, type })
                 });
+
+                // 清空輸入框
                 document.getElementById('desc').value = '';
                 document.getElementById('amount').value = '';
-                await fetchData(); // 重新抓取最新資料
+                
+                // 重新讀取資料
+                await fetchData();
             } catch (e) {
-                alert("儲存失敗");
+                alert("儲存失敗，請稍後再試。");
             }
-            showLoader(false);
+            toggleLoader(false);
         }
 
         function render(data) {
@@ -97,19 +121,20 @@
             let bal = 0, inc = 0, exp = 0;
             list.innerHTML = '';
 
+            // 將資料反轉，讓最新的排在上面
             data.reverse().forEach(item => {
                 const amt = parseFloat(item.amount);
                 if (item.type === 'income') { inc += amt; bal += amt; }
                 else { exp += amt; bal -= amt; }
 
                 const div = document.createElement('div');
-                div.className = 'glass-ui p-4 flex justify-between items-center';
+                div.className = 'glass-ui p-4 flex justify-between items-center animate-fade-in';
                 div.innerHTML = `
                     <div>
                         <p class="font-bold text-gray-800">${item.desc}</p>
-                        <p class="text-[10px] text-gray-400">${new Date(item.date).toLocaleDateString()}</p>
+                        <p class="text-[10px] text-gray-400 font-medium">${new Date(item.date).toLocaleDateString()} ${new Date(item.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
                     </div>
-                    <span class="font-bold ${item.type === 'income' ? 'text-green-500' : 'text-red-500'}">
+                    <span class="font-bold ${item.type === 'income' ? 'text-emerald-500' : 'text-rose-500'}">
                         ${item.type === 'income' ? '+' : '-'}$ ${amt.toLocaleString()}
                     </span>
                 `;
@@ -121,7 +146,7 @@
             expEl.innerText = `$ ${exp.toLocaleString()}`;
         }
 
-        function showLoader(show) {
+        function toggleLoader(show) {
             document.getElementById('loader').style.display = show ? 'flex' : 'none';
         }
     </script>
